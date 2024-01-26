@@ -1,0 +1,64 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+        cors:
+          allowed_origins:
+            - http://localhost:*
+          allowed_headers:
+            - '*'
+
+exporters:
+  otlphttp/loki:
+    endpoint: http://loki:3100
+    logs_endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+
+  otlp/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
+
+  prometheus:
+    endpoint: "collector:9090"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+processors:
+  batch:
+
+  attributes:
+    actions:
+    - action: insert
+      key: loki.attribute.labels
+      value: TraceId, SpanId
+
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1888
+  zpages:
+    endpoint: :55679
+
+service:
+  extensions: [pprof, zpages, health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [attributes, batch]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]

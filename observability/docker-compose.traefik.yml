@@ -1,0 +1,121 @@
+version: '3.8'
+services:
+  traefik:
+    image: "traefik:3.0"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.hc.address=:13133"
+      - "--entrypoints.otlp-grpc.address=:4317"
+      - "--entrypoints.otlp-http.address=:4318"
+      - "--entrypoints.zpages.address=:55679"
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: [ "-config.file=/etc/loki/loki.yaml" ]
+    volumes:
+      - ./config/loki/loki.yaml:/etc/loki/loki.yaml
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+
+  tempo-query:
+    image: grafana/tempo-query:latest
+    container_name: tempo-query
+    command: [ "--grpc-storage-plugin.configuration-file=/etc/tempo-query.yaml" ]
+    volumes:
+      - ./config/tempo-query/tempo-query.yaml:/etc/tempo-query.yaml
+    expose:
+      - "16686"  # jaeger-ui
+    depends_on:
+      - tempo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tempo-query.rule=Host(`jaeger.localhost`)"
+      - "traefik.http.routers.tempo-query.entrypoints=web"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    expose:
+      - "9090"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    volumes:
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    expose:
+      - "3000"
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
+
+  otel-collector:
+    container_name: collector
+    # image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:latest
+    restart: always
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+    volumes:
+      - ./config/otel-collector/collect-config.yaml:/etc/otel-collector-config.yaml
+    expose:
+      - "13133"  # health_check extension
+      - "4317"   # OTLP gRPC receiver
+      - "4318"   # OTLP HTTP receiver
+      - "55679" # zpages extension
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.hc.rule=Host(`collector.localhost`)"
+      - "traefik.http.routers.hc.entrypoints=hc"
+      - "traefik.http.routers.hc.service=hc"
+      - "traefik.http.services.hc.loadbalancer.server.port=13133"
+
+      - "traefik.http.routers.otlp-grpc-collect.rule=Host(`collector.localhost`)"
+      - "traefik.http.routers.otlp-grpc-collect.entrypoints=otlp-grpc"
+      - "traefik.http.routers.otlp-grpc-collect.service=otlp-grpc-collect"
+      - "traefik.http.services.otlp-grpc-collect.loadbalancer.server.port=4317"
+      - "traefik.http.services.otlp-grpc-collect.loadbalancer.server.scheme=h2c"
+
+      - "traefik.http.routers.otlp-http-collect.rule=Host(`collector.localhost`)"
+      - "traefik.http.routers.otlp-http-collect.entrypoints=otlp-http"
+      - "traefik.http.routers.otlp-http-collect.service=otlp-http-collect"
+      - "traefik.http.services.otlp-http-collect.loadbalancer.server.port=4318"
+
+      - "traefik.http.routers.zpages.rule=Host(`collector.localhost`)"
+      - "traefik.http.routers.zpages.entrypoints=web"
+      - "traefik.http.routers.zpages.service=zpages"
+      - "traefik.http.services.zpages.loadbalancer.server.port=55679"
