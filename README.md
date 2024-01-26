@@ -17,7 +17,7 @@ The Observability was a later addon.
 See the docker-compose files in repo.
 
 ## dctl configuration
-https://github.com/LordLyng/compose/blob/main/config.toml
+https://github.com/LordLyng/compose/blob/62ecd5f9c0715b274f9970f22c0738c1fccf4674/config.toml
 
 ## Invoking docker commands in WSL from pwoershell in windows
 In many cases I flip abck and fortyh between Windows and WSL. Because of that i often make my most used WSL commands available in powershell.  
