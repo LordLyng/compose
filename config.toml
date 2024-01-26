@@ -1,0 +1,29 @@
+[main]
+docker_bin = "/usr/bin/docker"
+default_command_args = [
+    { command_name = "up", command_args = [
+        "-d",
+        "--remove-orphans",
+    ] },
+]
+
+[[collections]]
+alias = "mssql"
+description = "Runs MSSQL Server"
+compose_files = ["/home/mhl/compose/db/mssql/docker-compose.yml"]
+
+[[collections]]
+alias = "mysql"
+description = "Runs MySQL Server"
+compose_files = ["/home/mhl/compose/db/mysql/docker-compose.yml"]
+
+[[collections]]
+alias = "postgres"
+description = "Runs Postgres Server"
+enviroment_file = "/home/mhl/compose/db/postgresql/database.env"
+compose_files = ["/home/mhl/compose/db/postgresql/docker-compose.yml"]
+
+[[collections]]
+alias = "obs"
+description = "Runs Observability cluster with Grafana"
+compose_files = ["/home/mhl/compose/observability/docker-compose.yml"]
