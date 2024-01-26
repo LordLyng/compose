@@ -18,7 +18,7 @@ See the docker-compose files in repo.
 
 ## dctl configuration
 
-https://github.com/LordLyng/compose/blob/main/config.toml#L1-L29
+https://github.com/LordLyng/compose/blob/f9507bb21c2042148331da777db07f2f819d450b/config.toml#L1-L29
 
 ## Invoking docker commands in WSL from pwoershell in windows
 In many cases I flip abck and fortyh between Windows and WSL. Because of that i often make my most used WSL commands available in powershell.  
