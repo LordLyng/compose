@@ -9,21 +9,21 @@ default_command_args = [
 
 [[collections]]
 alias = "mssql"
-description = "Runs MSSQL Server"
+description = "Runs MSSQL Server\nUsername: sa\nPassword: ZsQPJst6pcZQaLHt"
 compose_files = ["/home/mhl/compose/db/mssql/docker-compose.yml"]
 
 [[collections]]
 alias = "mysql"
-description = "Runs MySQL Server"
+description = "Runs MySQL Server\nUsername: root\nPassword: rootie"
 compose_files = ["/home/mhl/compose/db/mysql/docker-compose.yml"]
 
 [[collections]]
 alias = "postgres"
-description = "Runs Postgres Server"
+description = "Runs Postgres Server\nDB Username: unicorn_user\nDB Password: magical_password\npgAdmin Username: pgadmin4@pgadmin.org\npgAdmin Password: admin"
 enviroment_file = "/home/mhl/compose/db/postgresql/database.env"
 compose_files = ["/home/mhl/compose/db/postgresql/docker-compose.yml"]
 
 [[collections]]
 alias = "obs"
-description = "Runs Observability cluster with Grafana"
+description = "Runs Observability cluster with Grafana\nGrafana url: http://localhost:3000\nGrafana Username: admin\nGrafana Password: admin"
 compose_files = ["/home/mhl/compose/observability/docker-compose.yml"]
