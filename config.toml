@@ -24,6 +24,16 @@ enviroment_file = "/home/mhl/compose/db/postgresql/database.env"
 compose_files = ["/home/mhl/compose/db/postgresql/docker-compose.yml"]
 
 [[collections]]
+alias = "cosmos"
+description = "Runs Cosmos Emulator\nData Explorer: http://localhost:8081"
+compose_files = ["/home/mhl/compose/cosmos/docker-compose.yml"]
+
+[[collections]]
 alias = "obs"
 description = "Runs Observability cluster with Grafana\nGrafana url: http://localhost:3000\nGrafana Username: admin\nGrafana Password: admin"
 compose_files = ["/home/mhl/compose/observability/docker-compose.yml"]
+
+[[collections]]
+alias = "aspire_dash"
+description = "Run the Apsire dashboard standalone\nhttp://localhost:18888"
+compose_files = ["/home/mhl/compose/aspire-dashboard/docker-compose.yml"]

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  aspire-dashboard:
+    container_name: aspire_dash
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    ports:
+      - "18888:18888"
+      - "4317:18889"
+      - "18890:18890"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+      - DOTNET_DASHBOARD_OTLP_HTTP_ENDPOINT_URL=http://localhost:18890

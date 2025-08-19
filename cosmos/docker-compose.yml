@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  cosmos-emulator:
+    container_name: cosmos
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+    ports:
+      - "8081:8081"
+      - "10250-10255:10250-10255"
+    environment:
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - cosmos:/data/db
+
+volumes:
+  cosmos: 
